@@ -29,7 +29,7 @@ GrOrganizer is a comprehensive web-based application designed to simplify the ma
 #### Frontend
 - **HTML5**, **CSS3**, **JavaScript**
 - **Font Awesome** for icons
-- **Chart.js** for creating budget vs. expenditure charts
+- **Chart.js** for creating visual charts
 
 #### Backend
 - **Flask**: A lightweight Python web framework for building the backend API.
@@ -46,13 +46,11 @@ GrOrganizer is a comprehensive web-based application designed to simplify the ma
 
 ```
 project-root/
-|-- static/
-|   |-- css/      # Stylesheets
-|   |-- js/       # JavaScript files (including Chart.js integrations)
+|-- static/       # Public files and folders for css, js and images  
 |-- templates/    # HTML templates for the application
 |-- app.py        # Main Flask application
-|-- models.py     # Database models
-|-- routes.py     # Application routes and API endpoints
+|-- helpers.py     # Helper functions
+|-- grocery.db     # Database File
 |-- readme.md     # Project documentation
 ```
 
@@ -62,8 +60,8 @@ project-root/
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/grocery-organizer.git
-   cd grocery-organizer
+   git clone https://github.com/deepson1996/grorganizer.git
+   cd grorganizer
    ```
 
 2. Create and activate a virtual environment:
