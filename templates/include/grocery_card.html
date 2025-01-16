@@ -1,0 +1,36 @@
+<div class="col-xl-3 col-md-6">
+    <div class="card {% if grocery.completed %}
+  bg-success {% else %} bg-warning {% endif %}  text-white mb-4">
+        <div class="card-body cursor-pointer grocery_card min-h-card" data-href="/groceries/shop/{{grocery.id}}">
+            <div class="d-flex justify-content-between">
+                <div>{{ grocery.name }}</div>
+                <div class="d-flex flex-column justify-content-between">
+                    <div>
+                        Budget:{{ grocery.balance }}
+                    </div>
+                    <div>
+                        Spent: {{ grocery.total_spent }}
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex align-items-center justify-content-between">
+                <a class="text-white" href="/groceries/shop/{{grocery.id}}">
+                    {% for place in grocery.item_count_per_place %}
+                    <span class="badge bg-danger">{{ place.place }}: {{ place.count }}</span> <br>
+                    {% endfor %}
+                </a>
+            </div>
+        </div>
+        <!-- </a> -->
+        <div class="card-footer d-flex align-items-center justify-content-end text-white">
+
+            <a href="/groceries/share/{{ grocery.id }}" class="btn btn-success me-1">Share</a> <br>
+            {% if not grocery.sid %}
+            <a href="/groceries/edit/{{ grocery.id }}" class="btn btn-primary me-1">Edit</a> <br>
+            <a href="/groceries/delete/{{ grocery.id }}" class="btn btn-danger delete">Delete</a>
+            {% else %}
+            <a href="/groceries/undoshare/{{ grocery.sid }}" class="btn btn-danger delete">Remove</a>
+            {% endif %}
+        </div>
+    </div>
+</div>

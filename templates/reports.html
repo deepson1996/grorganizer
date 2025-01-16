@@ -1,0 +1,228 @@
+{% extends "layout.html" %}
+{% block title %}Reports{% endblock %}
+{% block css %}
+<style>
+  label {
+    font-weight: bold;
+  }
+
+  .col-md-3 {
+    margin-bottom: 10px;
+  }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container-fluid px-4">
+  <h1 class="mt-4">Reports</h1>
+  <ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item active">Reports</li>
+  </ol>
+  <div class="card mb-4">
+    <div class="card-header">
+      <i class="fas fa-table me-1"></i>
+      Filter Report
+    </div>
+    <div class="card-body">
+      <form method="GET" action="{{ url_for('reports') }}" class="mb-3">
+        <div class="row">
+          <!-- Filter by Grocery Title -->
+          <div class="col-md-3">
+            <label for="grocery_name" class="form-label">Grocery Title</label>
+            <input type="text" name="grocery_name" id="grocery_name" class="form-control"
+              placeholder="Enter grocery title" value="{{ request.args.get('grocery_name', '') }}">
+          </div>
+
+          <!-- Filter by Budget Range -->
+          <div class="col-md-3">
+            <label for="budget_min" class="form-label">Budget Range</label>
+            <div class="input-group">
+              <input type="number" step="0.01" name="budget_min" id="budget_min" class="form-control" placeholder="Min"
+                value="{{ request.args.get('budget_min', '') }}">
+              <input type="number" step="0.01" name="budget_max" id="budget_max" class="form-control" placeholder="Max"
+                value="{{ request.args.get('budget_max', '') }}">
+            </div>
+          </div>
+
+          <!-- Filter by Expenditure Range -->
+          <div class="col-md-3">
+            <label for="exp_min" class="form-label">Expenditure Range</label>
+            <div class="input-group">
+              <input type="number" step="0.01" name="exp_min" id="exp_min" class="form-control" placeholder="Min"
+                value="{{ request.args.get('exp_min', '') }}">
+              <input type="number" step="0.01" name="exp_max" id="exp_max" class="form-control" placeholder="Max"
+                value="{{ request.args.get('exp_max', '') }}">
+            </div>
+          </div>
+
+          <!-- Filter by Completion Status -->
+          <div class="col-md-3">
+            <label for="grocery_completed" class="form-label">Completion Status</label>
+            <select name="grocery_completed" id="grocery_completed" class="form-control">
+              <option value="" {% if request.args.get('grocery_completed')=='' %}selected{% endif %}>All</option>
+              <option value="1" {% if request.args.get('grocery_completed')=='1' %}selected{% endif %}>Completed
+              </option>
+              <option value="0" {% if request.args.get('grocery_completed')=='0' %}selected{% endif %}>Pending</option>
+            </select>
+          </div>
+          <!-- Filter by Item Name -->
+          <div class="col-md-3">
+            <label for="item_name" class="form-label">Item Name</label>
+            <input type="text" name="item_name" id="item_name" class="form-control" placeholder="Enter place"
+              value="{{ request.args.get('item_name', '') }}">
+          </div>
+          <!-- Filter by Item Price Range -->
+          <div class="col-md-3">
+            <label for="item_price_min" class="form-label">Item Price Range</label>
+            <div class="input-group">
+              <input type="number" step="0.01" name="item_price_min" id="item_price_min" class="form-control"
+                placeholder="Min" value="{{ request.args.get('item_price_min', '') }}">
+              <input type="number" step="0.01" name="item_price_max" id="item_price_max" class="form-control"
+                placeholder="Max" value="{{ request.args.get('item_price_max', '') }}">
+            </div>
+          </div>
+          <!-- Filter by Item Status -->
+          <div class="col-md-3">
+            <label for="item_status" class="form-label">Item Status</label>
+            <select name="item_status" id="item_status" class="form-control">
+              <option value="" {% if request.args.get('item_status')=='' %}selected{% endif %}>All</option>
+              <option value="1" {% if request.args.get('item_status')=='1' %}selected{% endif %}>Bought</option>
+              <option value="0" {% if request.args.get('item_status')=='0' %}selected{% endif %}>Pending</option>
+              <option value="-1" {% if request.args.get('item_status')=='-1' %}selected{% endif %}>Removed</option>
+            </select>
+          </div>
+
+          <!-- Filter by Category -->
+          <div class="col-md-3">
+            <label for="category_name" class="form-label">Category</label>
+            <select name="category_name" id="category_name" class="form-control">
+              <option value="" {% if request.args.get('category_name')=='' %}selected{% endif %}>All</option>
+              {% for category in categories %}
+              <option value="{{category.category_name}}" {% if request.args.get('category_name') == category.category_name %} selected {% endif %}>
+                {{category.category_name}}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Filter by Place -->
+          <div class="col-md-3">
+            <label for="place_name" class="form-label">Place</label>
+            <select name="place_name" id="place_name" class="form-control">
+              <option value="" {% if request.args.get('place_name')=='' %}selected{% endif %}>All</option>
+              {% for place in places %}
+              <option value="{{place.place_name}}" {% if
+                request.args.get('place_name') == place.place_name %}selected{% endif %}>
+                {{place.place_name}}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Filter by Date Range -->
+          <div class="col-md-3">
+            <label for="created_date" class="form-label">Created Date Range</label>
+            <div class="input-group">
+              <input type="date" name="start_date" id="start_date" class="form-control"
+                value="{{ request.args.get('start_date', '') }}">
+              <input type="date" name="end_date" id="end_date" class="form-control"
+                value="{{ request.args.get('end_date', '') }}">
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter Button -->
+        <div class="row mt-3">
+          <div class="col-md-12 text-end">
+            <button type="submit" class="btn btn-primary">Filter</button>
+            <a href="{{ url_for('reports') }}" class="btn btn-secondary">Reset</a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header">
+      <i class="fas fa-table me-1"></i>
+      Detailed Report
+    </div>
+    <div class="card-body">
+      <table id="" class="table table-striped">
+        <thead>
+          <tr>
+            <!-- <th>Username</th> -->
+            <!-- <th>Email</th> -->
+            <th>Grocery Title</th>
+            <th>Budget</th>
+            <th>Expenditure</th>
+            <th>Completed</th>
+            <th>Item</th>
+            <th>Item Price</th>
+            <th>Item Status</th>
+            <th>Category</th>
+            <th>Place</th>
+            <th>Shared With</th>
+            <th>Created Date</th>
+          </tr>
+        </thead>
+        <tfoot>
+          <tr>
+            <!-- <th>Username</th> -->
+            <!-- <th>Email</th> -->
+            <th>Grocery Title</th>
+            <th>Budget</th>
+            <th>Expenditure</th>
+            <th>Status</th>
+            <th>Item</th>
+            <th>Price</th>
+            <th>Item Status</th>
+            <th>Category</th>
+            <th>Place</th>
+            <th>Shared With</th>
+            <th>Created Date</th>
+          </tr>
+        </tfoot>
+        <tbody>
+          {% for detail in details %}
+          <tr>
+            <!-- <td>{{detail.user_name}}</td> -->
+            <!-- <td>{{detail.user_email}}</td> -->
+            <td>{{detail.grocery_name}}</td>
+            <td>{{detail.grocery_balance}}</td>
+            <td>{{detail.grocery_expenditure}}</td>
+            <td>
+              {% if detail.grocery_completed %}
+              <span class="badge bg-success">Completed</span>
+              {% else %}
+              <span class="badge bg-warning">Pending</span>
+              {% endif %}
+              <!-- {{detail.grocery_completed}} -->
+
+            </td>
+            <td>{{detail.item_name}}</td>
+            <td>{{detail.item_price}}</td>
+            <td>
+              <!-- {{detail.item_bought}} -->
+              {% if detail.item_bought == 1 %}
+              <span class="badge bg-success">Bought</span>
+              {% elif detail.item_bought == -1 %}
+              <span class="badge bg-danger">Removed</span>
+              {% else %}
+              <span class="badge bg-secondary">Pending</span>
+              {% endif %}
+            </td>
+            <td>{{detail.category_name}}</td>
+            <td>{{detail.place_name}}</td>
+            <td>{{detail.shared_with_user_name}}</td>
+            <td>{{detail.grocery_updated_at}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock content %} {% block js %}
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"
+  crossorigin="anonymous"></script>
+<script src="{{ url_for('static',filename='js/datatables-simple-demo.js') }}"></script>
+
+{% endblock js %}

@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+<main>
+    <div class="container-fluid px-4">
+        <h1 class="mt-4">Profile</h1>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item active">Profile</li>
+        </ol>
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-table me-1"></i>
+                Profile
+            </div>
+            <div class="card-body">
+                <form method="post" action="/profile">
+                    <div class="form-floating mb-3">
+                        <input class="form-control" id="name" type="text" name="name" value="{{user.name}}" />
+                        <label for="inputPassword">Name</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input class="form-control" id="email" type="email" name="email" value="{{user.email}}" />
+                        <label for="inputOldPassword">Email</label>
+                    </div>  
+                    <button type="submit" class="btn btn-primary">Update Profile</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock content %}

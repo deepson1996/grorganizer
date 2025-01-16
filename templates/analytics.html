@@ -1,0 +1,389 @@
+{% extends "layout.html" %}
+{% block title %}Analytics{% endblock %}
+{% block content %}
+<div class="container-fluid px-4">
+  <h1 class="mt-4">Analytics</h1>
+  <ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item active">Analytics</li>
+  </ol>
+  <div class="row">
+    <div class="col-xl-6">
+      <div class="card mb-4">
+        <div class="card-header">
+          <i class="fas fa-chart-area me-1"></i>
+          Daily Expences
+        </div>
+        <div class="card-body">
+          <canvas id="myAreaChart" width="100%" height="40"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-6">
+      <div class="card mb-4">
+        <div class="card-header">
+          <i class="fas fa-chart-bar me-1"></i>
+          Bar Chart Example
+        </div>
+        <div class="card-body">
+          <canvas id="myBarChart" width="100%" height="40"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-6">
+      <div class="card mb-4">
+        <div class="card-header">
+          <i class="fas fa-chart-bar me-1"></i>
+          Bar Chart Example
+        </div>
+        <div class="card-body">
+          <canvas id="myBarChart2" width="100%" height="40"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-6">
+      <div class="card mb-4">
+        <div class="card-header">
+          <i class="fas fa-chart-pie me-1"></i>
+          Pie Chart Example
+        </div>
+        <div class="card-body">
+          <canvas id="myPieChart" width="100%" height="40"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-6">
+      <div class="card mb-4">
+        <div class="card-header">
+          <i class="fas fa-chart-pie me-1"></i>
+          Pie Chart Example
+        </div>
+        <div class="card-body">
+          <canvas id="myHistogram" width="100%" height="40"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-6">
+      <div class="card mb-4">
+        <div class="card-header">
+          <i class="fas fa-chart-area me-1"></i>
+          Budget Vs Expenditure
+        </div>
+        <div class="card-body">
+          <canvas id="myAreaChart2" width="100%" height="40"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %} {% block js %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
+<!-- <script src="{{ url_for('static',filename='demo/chart-area-demo.js') }}"></script> -->
+<!-- <script src="{{ url_for('static',filename='demo/chart-bar-demo.js') }}"></script> -->
+
+<script>
+  // Set new default font family and font color to mimic Bootstrap's default styling
+  Chart.defaults.global.defaultFontFamily = '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+  Chart.defaults.global.defaultFontColor = '#292b2c';
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    const response = await fetch("/api/analytics");
+    const data = await response.json();
+
+    const dates = data.daily_expences.map((item) => item.date);
+    const balances = data.daily_expences.map((item) => item.expences);
+
+    const categories = data.category_expenditure.map((item) => item.category_name);
+    const expences = data.category_expenditure.map((item) => item.expenditure);
+
+    const places = data.place_expenditure.map((item) => item.place_name);
+    const place_expences = data.place_expenditure.map((item) => item.expenditure);
+
+    const completed = data.gr.completed;
+    const incomplete = data.gr.incomplete;
+
+    const item_prices = data.item_prices.map((item) => item.item_price);
+    console.log(item_prices)
+
+    var ctx = document.getElementById("myAreaChart");
+    var myLineChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: dates,
+        datasets: [{
+          label: "Expences",
+          lineTension: 0.3,
+          backgroundColor: "rgba(2,117,216,0.2)",
+          borderColor: "rgba(2,117,216,1)",
+          pointRadius: 5,
+          pointBackgroundColor: "rgba(2,117,216,1)",
+          pointBorderColor: "rgba(255,255,255,0.8)",
+          pointHoverRadius: 5,
+          pointHoverBackgroundColor: "rgba(2,117,216,1)",
+          pointHitRadius: 50,
+          pointBorderWidth: 2,
+          data: balances,
+        }],
+      },
+      options: {
+        scales: {
+          xAxes: [{
+            time: {
+              unit: 'date'
+            },
+            gridLines: {
+              display: false
+            },
+            ticks: {
+              maxTicksLimit: 7
+            }
+          }],
+          yAxes: [{
+            ticks: {
+              min: 0,
+              maxTicksLimit: 5
+            },
+            gridLines: {
+              color: "rgba(0, 0, 0, .125)",
+            }
+          }],
+        },
+        legend: {
+          display: false
+        }
+      }
+    });
+    var ctx = document.getElementById("myBarChart");
+    var myLineChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: categories,
+        datasets: [{
+          label: "Expences by categories",
+          backgroundColor: "rgba(2,117,216,1)",
+          borderColor: "rgba(2,117,216,1)",
+          data: expences,
+        }],
+      },
+      options: {
+        scales: {
+          xAxes: [{
+            time: {
+              unit: 'month'
+            },
+            gridLines: {
+              display: false
+            },
+            ticks: {
+              maxTicksLimit: 6
+            }
+          }],
+          yAxes: [{
+            ticks: {
+              min: 0,
+              max: 15000,
+              maxTicksLimit: 5
+            },
+            gridLines: {
+              display: true
+            }
+          }],
+        },
+        legend: {
+          display: false
+        }
+      }
+    });
+    var ctx = document.getElementById("myBarChart2");
+    var myLineChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: places,
+        datasets: [{
+          label: "Expences by categories",
+          backgroundColor: "rgba(2,117,216,1)",
+          borderColor: "rgba(2,117,216,1)",
+          data: place_expences,
+        }],
+      },
+      options: {
+        scales: {
+          xAxes: [{
+            time: {
+              unit: 'month'
+            },
+            gridLines: {
+              display: false
+            },
+            ticks: {
+              maxTicksLimit: 6
+            }
+          }],
+          yAxes: [{
+            ticks: {
+              min: 0,
+              max: 15000,
+              maxTicksLimit: 5
+            },
+            gridLines: {
+              display: true
+            }
+          }],
+        },
+        legend: {
+          display: false
+        }
+      }
+    });
+    var ctx = document.getElementById("myPieChart");
+    var myPieChart = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: ["Completed", "Incomplete"],
+        datasets: [{
+          data: [completed, incomplete],
+          backgroundColor: ['#28a745', '#dc3545'],
+        }],
+      },
+    });
+
+
+    const binSize = 200;
+    const maxPrice = Math.max(...item_prices);
+    const minPrice = Math.min(...item_prices);
+    const binCount = Math.ceil((maxPrice - minPrice) / binSize);
+
+
+    // Create bins
+    const bins = Array(binCount).fill(0);
+    item_prices.forEach((price) => {
+      const binIndex = Math.floor((price - minPrice) / binSize);
+      bins[binIndex]++;
+    });
+
+    // Labels for bins
+    const labels = Array(binCount)
+      .fill(0)
+      .map(
+        (_, i) =>
+          `${Math.round(minPrice + i * binSize)} - ${Math.round(
+            minPrice + (i + 1) * binSize
+          )}`
+      );
+
+    // Create Chart.js histogram
+    var ctx = document.getElementById('myHistogram').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Number of Items',
+            data: bins,
+            backgroundColor: '#4CAF50',
+            borderColor: '#388E3C',
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: false,
+          },
+        },
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Price Range (in currency)',
+            },
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Number of Items',
+            },
+          },
+        },
+      },
+    });
+
+    // Static data for demonstration
+    var datess = data.budgetexp.map((item) => item.date);
+    var budgets = data.budgetexp.map((item) => item.budget);
+    var expenditures = data.budgetexp.map((item) => item.expenditure);
+    console.log(data.budgetexp);
+    // Create the chart
+    var ctx = document.getElementById('myAreaChart2').getContext('2d');
+
+    var chart = new Chart(ctx, {
+      type: 'line',  // Line chart type
+      data: {
+        labels: datess,  // Dates on the X-axis
+        datasets: [
+          {
+            label: 'Budget',
+            data: budgets,
+            borderColor: 'rgba(75, 192, 192, 1)',  // Color of the budget line
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',  // Background color under the line
+            fill: false,  // Don't fill the area under the line
+            tension: 0.1  // Smoothness of the line
+          },
+          {
+            label: 'Expenditure',
+            data: expenditures,
+            borderColor: 'rgba(255, 99, 132, 1)',  // Color of the expenditure line
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',  // Background color under the line
+            fill: false,  // Don't fill the area under the line
+            tension: 0.1  // Smoothness of the line
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'top',
+          },
+          tooltip: {
+            callbacks: {
+              label: function (tooltipItem) {
+                return tooltipItem.datasetIndex === 0
+                  ? `Budget: NPR ${tooltipItem.raw}`
+                  : `Expenditure: NPR ${tooltipItem.raw}`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            type: 'category',
+            title: {
+              display: true,
+              text: 'Date'
+            },
+            ticks: {
+              autoSkip: true,  // Skips ticks if they overlap
+              maxRotation: 45,  // Rotate the labels to avoid overlap
+              minRotation: 45
+            }
+          },
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Amount (NPR)'
+            }
+          }
+        }
+      }
+    });
+
+  });
+
+
+</script>
+{% endblock js %}

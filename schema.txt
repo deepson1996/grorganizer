@@ -1,0 +1,169 @@
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL,
+    password TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TRIGGER update_users_updated_at
+AFTER UPDATE ON users
+FOR EACH ROW
+BEGIN
+    UPDATE users
+    SET updated_at = CURRENT_TIMESTAMP
+    WHERE id = OLD.id;
+END;
+
+CREATE TABLE IF NOT EXISTS categories (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    category TEXT NOT NULL UNIQUE,
+    description TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TRIGGER update_categories_updated_at
+AFTER UPDATE ON categories
+FOR EACH ROW
+BEGIN
+    UPDATE categories
+    SET updated_at = CURRENT_TIMESTAMP
+    WHERE id = OLD.id;
+END;
+
+CREATE TABLE IF NOT EXISTS places (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    place TEXT NOT NULL UNIQUE,
+    description TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TRIGGER update_places_updated_at
+AFTER UPDATE ON places
+FOR EACH ROW
+BEGIN
+    UPDATE places
+    SET updated_at = CURRENT_TIMESTAMP
+    WHERE id = OLD.id;
+END;
+
+CREATE TABLE IF NOT EXISTS groceries (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    balance REAL NOT NULL DEFAULT 0.0,
+    user_id INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+ALTER TABLE groceries
+ADD COLUMN completed BOOLEAN NOT NULL DEFAULT 0;
+ALTER TABLE groceries
+ADD COLUMN expenditure REAL NOT NULL DEFAULT 0.0;
+
+CREATE TRIGGER update_groceries_updated_at
+AFTER UPDATE ON groceries
+FOR EACH ROW
+BEGIN
+    UPDATE groceries
+    SET updated_at = CURRENT_TIMESTAMP
+    WHERE id = OLD.id;
+END;
+
+CREATE TABLE IF NOT EXISTS grocery_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    price REAL NOT NULL,
+    bought BOOLEAN NOT NULL DEFAULT 0,
+    grocery_id INTEGER NOT NULL,
+    category_id INTEGER NOT NULL,
+    place_id INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (grocery_id) REFERENCES groceries (id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE SET NULL,
+    FOREIGN KEY (place_id) REFERENCES places (id) ON DELETE SET NULL
+);
+CREATE TRIGGER update_grocery_items_updated_at
+AFTER UPDATE ON grocery_items
+FOR EACH ROW
+BEGIN
+    UPDATE grocery_items
+    SET updated_at = CURRENT_TIMESTAMP
+    WHERE id = OLD.id;
+END;
+
+CREATE TABLE IF NOT EXISTS contacts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    created_by INTEGER NOT NULL,  -- User who created the contact
+    user_contact_id INTEGER NOT NULL,  -- User being added as a contact
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE CASCADE,
+    FOREIGN KEY (user_contact_id) REFERENCES users (id) ON DELETE CASCADE,
+    UNIQUE (created_by, user_contact_id)
+);
+CREATE TRIGGER update_contacts_updated_at
+AFTER UPDATE ON contacts
+FOR EACH ROW
+BEGIN
+    UPDATE contacts
+    SET updated_at = CURRENT_TIMESTAMP
+    WHERE id = OLD.id;
+END;
+
+
+CREATE TABLE IF NOT EXISTS shared_groceries (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    shared_by INTEGER NOT NULL,  -- User who shared the grocery list
+    shared_to INTEGER NOT NULL,  -- User with whom the grocery list is shared
+    grocery_id INTEGER NOT NULL, -- The shared grocery list
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (shared_by) REFERENCES users (id) ON DELETE CASCADE,
+    FOREIGN KEY (shared_to) REFERENCES users (id) ON DELETE CASCADE,
+    FOREIGN KEY (grocery_id) REFERENCES groceries (id) ON DELETE CASCADE,
+    UNIQUE (shared_by, shared_to, grocery_id)
+);
+CREATE TRIGGER update_shared_groceries_updated_at
+AFTER UPDATE ON shared_groceries
+FOR EACH ROW
+BEGIN
+    UPDATE shared_groceries
+    SET updated_at = CURRENT_TIMESTAMP
+    WHERE id = OLD.id;
+END;
+
+ALTER TABLE users ADD COLUMN reset_token TEXT;
+ALTER TABLE users ADD COLUMN reset_token_expiry DATETIME;
+
+
+CREATE VIEW IF NOT EXISTS report_generation AS
+SELECT
+    u.id AS user_id,
+    u.name AS user_name,
+    u.email AS user_email,
+    g.id AS grocery_id,
+    g.name AS grocery_name,
+    g.balance AS grocery_balance,
+    g.expenditure AS grocery_expenditure,
+    g.completed AS grocery_completed,
+    gi.id AS item_id,
+    gi.name AS item_name,
+    gi.price AS item_price,
+    gi.bought AS item_bought,
+    c.category AS category_name,
+    p.place AS place_name,
+    sg.shared_to AS shared_with_user_id,
+    (SELECT name FROM users WHERE id = sg.shared_to) AS shared_with_user_name,
+    gi.created_at AS grocery_created_at,
+    gi.updated_at AS grocery_updated_at
+FROM
+    users u
+LEFT JOIN groceries g ON u.id = g.user_id
+LEFT JOIN grocery_items gi ON g.id = gi.grocery_id
+LEFT JOIN categories c ON gi.category_id = c.id
+LEFT JOIN places p ON gi.place_id = p.id
+LEFT JOIN shared_groceries sg ON g.id = sg.grocery_id
+ORDER BY
+    gi.updated_at DESC;

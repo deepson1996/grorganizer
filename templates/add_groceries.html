@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+{% block title %}Add Grocery{% endblock %}
+{% block content %}
+<main>
+    <div class="container-fluid px-4">
+        <h1 class="mt-4">Add Grocery</h1>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item active">Grocery / Create</li>
+        </ol>
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-table me-1"></i>
+                Add Grocery
+            </div>
+            <div class="card-body">
+                <form method="post" action="/groceries/create">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input class="form-control" id="name" type="text" name="name" autofocus
+                                    placeholder="Name" />
+                                <label for="category">Name</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input class="form-control" id="balance" type="number" name="balance" autofocus
+                                    placeholder="Budget" value="0" />
+                                <label for="category">Budget</label>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock content %}

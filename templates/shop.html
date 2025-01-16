@@ -1,0 +1,160 @@
+{% extends "layout.html" %}
+{% block title %}Shop{% endblock %}
+{% block content %}
+<div class="container-fluid px-4">
+  <h1 class="mt-4">Shop</h1>
+  <ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item active">Shop</li>
+  </ol>
+  <div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <div>
+        <i class="fas fa-table me-1"></i> Shop
+      </div>
+      <div>
+        <a href="/dashboard" class="btn btn-primary">Go back to dashboard</a>
+      </div>
+    </div>
+    <div class="d-flex flex-column sticky-total">
+      <div><b>Total Budget: </b> <span class="total_budget">{{budget}}</span></div>
+      <div class="total_exp_div {% if expenditure > budget %} text-danger {% endif %} "><b>Total Expenditure: </b><span class="total_exp">{{expenditure}}</span> </div>
+    </div>
+    <div class="card-body">
+
+      <!-- Tabs navigation -->
+      <!-- <ul class="nav nav-tabs" id="placeTabs" role="tablist">
+        {% for place in items_by_place %}
+        <li class="nav-item" role="presentation">
+          <button class="nav-link {% if loop.index == 1 %}active{% endif %}" id="tab-{{ loop.index }}-tab"
+            data-bs-toggle="tab" data-bs-target="#tab-{{ loop.index }}" type="button" role="tab"
+            aria-controls="tab-{{ loop.index }}" aria-selected="{{ 'true' if loop.index == 1 else 'false' }}">
+            {{ place }}
+          </button>
+        </li>
+        {% endfor %}
+      </ul> -->
+
+      <!-- Tabs content -->
+
+      {% for place in items_by_place %}
+      <h5 class="mt-3">{{ place }}</h5>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Item Name</th>
+            <th width="30%">Price</th>
+            <th width="30%">Bought</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in items_by_place[place] %}
+          <tr>
+            <td>{{ item.name }}</td>
+            <td>
+              <input type="number" class="form-control {% if
+                item.bought == 0 %} price_input {% endif %} pi" data-id="{{item.id}}" value="{{ item.price }}" {% if
+                item.bought !=0 %} disabled {% endif %}>
+            </td>
+            <td>
+              {% if item.bought == 0 %}
+              <form action="/shop/buy/{{item.id}}" class="d-inline">
+                <input type="hidden" name="price" id="hidden_price_{{item.id}}" value="{{ item.price }}">
+                <button type="submit" class="btn btn-success btn-sm buy_item" title="Mark as bought">
+                  <i class="fas fa-check"></i>
+                </button>
+              </form>
+
+
+              <a href="/shop/notbuy/{{ item.id }}" class="btn btn-danger btn-sm" title="Don't buy">
+                <i class="fas fa-times"></i>
+              </a>
+              {% else %}
+              {% if item.bought == -1 %}
+              <span class="badge bg-danger">Not bought</span>
+              {% else %}
+              <span class="badge bg-success">Bought</span>
+              {% endif %}
+              <a href="/shop/undobuy/{{ item.id }}" class="badge badge-secondary text-dark">Undo</a>
+              {% endif %}
+
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% endfor %}
+
+
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block js %}
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"
+  crossorigin="anonymous"></script>
+<script src="{{ url_for('static', filename='js/datatables-simple-demo.js') }}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var priceInputs = document.querySelectorAll('.price_input');
+    priceInputs.forEach(function (priceInput) {
+      priceInput.addEventListener('keyup', function () {
+        var itemId = priceInput.getAttribute('data-id');
+        var price = priceInput.value;
+        var hiddenPrice = document.querySelector('#hidden_price_' + itemId);
+        hiddenPrice.value = price;
+      });
+    });
+  });
+  function fillupvalue() {
+    var priceInputs = document.querySelectorAll('.price_input');
+    priceInputs.forEach(function (priceInput) {
+      var itemId = priceInput.getAttribute('data-id');
+      var price = priceInput.value;
+      var hiddenPrice = document.querySelector('#hidden_price_' + itemId);
+      hiddenPrice.value = price;
+    });
+  }
+
+
+  let total_budget = parseFloat(document.querySelector('.total_budget').textContent);
+  let continued = false;
+  total_budget = isNaN(total_budget) ? 0 : total_budget;
+
+  // Function to calculate the total expenditure across all tabs
+  function calculateTotalExpenditure() {
+    let totalExpenditure = 0;
+
+    // Loop through all price input fields in all tabs
+    document.querySelectorAll('.pi').forEach(input => {
+      const price = parseFloat(input.value);
+      if (!isNaN(price)) {
+        totalExpenditure += price;
+      }
+    });
+    document.querySelector('.total_exp').textContent = totalExpenditure.toFixed(2);
+    fillupvalue();
+
+    if (totalExpenditure > total_budget) {
+      document.querySelector('.total_exp_div').classList.add('text-danger');
+    } else {
+      document.querySelector('.total_exp_div').classList.remove('text-danger');
+    }
+    if (totalExpenditure > total_budget && !continued) {
+      confirmed = confirm('You have exceeded your budget. Do you want to continue?');
+      if (confirmed) {
+        continued = true;
+      }
+    }
+  }
+
+  // Event listener for input changes on price inputs
+  document.addEventListener('input', (event) => {
+    if (event.target.classList.contains('pi')) {
+      calculateTotalExpenditure();
+    }
+  });
+</script>
+
+
+{% endblock js %}

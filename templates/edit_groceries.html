@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+{% block title %}Edit Grocery{% endblock %}
+{% block content %}
+<main>
+    <div class="container-fluid px-4">
+        <h1 class="mt-4">Edit Grocery</h1>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item active">Grocery / Edit</li>
+        </ol>
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between">
+                <div>
+                    <i class="fas fa-table me-1"></i>
+                    Edit Grocery
+                </div>
+                <div>
+                    <a href="/groceries/items/{{grocery.id}}" class="btn btn-success float-right">Items</a>
+                </div>
+
+            </div>
+            <div class="card-body">
+                <form method="post" action="">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input class="form-control" id="name" type="text" name="name" autofocus
+                                    value="{{grocery.name}}" />
+                                <label for="category">Name</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input class="form-control" id="balance" type="number" name="balance" autofocus
+                                    placeholder="Budget" value="{{grocery.balance}}" />
+                                <label for="category">Budget</label>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock content %}
